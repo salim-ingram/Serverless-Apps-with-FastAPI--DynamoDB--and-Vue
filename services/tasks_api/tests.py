@@ -3,10 +3,11 @@ import uuid
 import boto3
 import pytest
 from fastapi import status
-from main import app
-from models import Task, TaskStatus
 from moto import mock_dynamodb
 from starlette.testclient import TestClient
+
+from main import app
+from models import Task, TaskStatus
 from store import TaskStore
 
 
@@ -72,7 +73,9 @@ def test_added_task_retrieved_by_id(dynamodb_table):
 def test_open_tasks_listed(dynamodb_table):
     repository = TaskStore(table_name=dynamodb_table)
     open_task = Task.create(uuid.uuid4(), "Sharpen your tools", "user@dev.com")
-    closed_task = Task(uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com")
+    closed_task = Task(
+        uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com"
+    )
 
     repository.add(open_task)
     repository.add(closed_task)
@@ -83,7 +86,9 @@ def test_open_tasks_listed(dynamodb_table):
 def test_closed_tasks_listed(dynamodb_table):
     repository = TaskStore(table_name=dynamodb_table)
     open_task = Task.create(uuid.uuid4(), "Sharpen your tools", "user@dev.com")
-    closed_task = Task(uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com")
+    closed_task = Task(
+        uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com"
+    )
 
     repository.add(open_task)
     repository.add(closed_task)
