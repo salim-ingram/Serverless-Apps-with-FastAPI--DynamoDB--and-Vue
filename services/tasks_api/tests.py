@@ -3,10 +3,11 @@ import uuid
 import boto3
 import pytest
 from fastapi import status
-from main import app
-from models import Task
 from moto import mock_dynamodb
 from starlette.testclient import TestClient
+
+from main import app
+from models import Task
 from store import TaskStore
 
 
