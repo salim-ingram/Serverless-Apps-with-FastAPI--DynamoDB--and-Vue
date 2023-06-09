@@ -24,11 +24,11 @@ class TaskStore:
 
     def get_by_id(self, task_id, owner):
         dynamodb = boto3.resource("dynamodb")
-        table = dynamodb.Table(self.tablename)
+        table = dynamodb.Table(self.table_name)
         record = table.get_item(
             Key={
                 "PK": f"#{owner}",
-                "SK": f"{task_id}",
+                "SK": f"#{task_id}",
             },
         )
         return Task(
