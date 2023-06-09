@@ -1,4 +1,4 @@
-name: API Test and deploy
+name: API Test and Deploy
 on:
   push:
     paths:
