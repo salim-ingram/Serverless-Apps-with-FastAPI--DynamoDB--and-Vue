@@ -6,13 +6,13 @@ Resources:
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: PK
-        - AttributeType: S
+          AttributeType: S
         - AttributeName: SK
-        - AttributeType: S
+          AttributeType: S
         - AttributeName: GS1PK
-        - AttributeType: S
+          AttributeType: S
         - AttributeName: GS1SK
-        - AttributeType: S
+          AttributeType: S
       KeySchema:
         - AttributeName: PK
           KeyType: HASH
