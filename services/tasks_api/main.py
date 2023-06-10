@@ -2,14 +2,13 @@ import uuid
 from typing import Union
 
 import jwt
+from config import Config
 from fastapi import Depends, FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-from starlette import status
-
-from config import Config
 from models import Task
-from schemas import APITask, APITasksList, CreateTask
+from schemas import APITask, APITasksList, CloseTask, CreateTask
+from starlette import status
 from store import TaskStore
 
 app = FastAPI()
@@ -28,9 +27,7 @@ def get_task_store() -> TaskStore:
 
 
 def get_user_email(authorization: Union[str, None] = Header(default=None)) -> str:
-    return jwt.decode(authorization, options={"verify_signature": False})[
-        "cognito:username"
-    ]
+    return jwt.decode(authorization, options={"verify_signature": False})["cognito:username"]
 
 
 @app.get("/api/health-check/")
@@ -38,9 +35,7 @@ def health_check():
     return {"message": "OK"}
 
 
-@app.post(
-    "/api/create-task", response_model=APITask, status_code=status.HTTP_201_CREATED
-)
+@app.post("/api/create-task", response_model=APITask, status_code=status.HTTP_201_CREATED)
 def create_task(
     parameters: CreateTask,
     user_email: str = Depends(get_user_email),
@@ -58,6 +53,19 @@ def open_tasks(
     task_store: TaskStore = Depends(get_task_store),
 ):
     return APITasksList(results=task_store.list_open(owner=user_email))
+
+
+@app.post("/api/close-task", response_model=APITask)
+def close_task(
+    parameters: CloseTask,
+    user_email: str = Depends(get_user_email),
+    task_store: TaskStore = Depends(get_task_store),
+):
+    task = task_store.get_by_id(task_id=parameters.id, owner=user_email)
+    task.close()
+    task_store.add(task)
+
+    return task
 
 
 handle = Mangum(app)

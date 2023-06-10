@@ -1,8 +1,7 @@
 from uuid import UUID
 
-from pydantic import BaseModel
-
 from models import TaskStatus
+from pydantic import BaseModel
 
 
 class CreateTask(BaseModel):
@@ -24,3 +23,7 @@ class APITasksList(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class CloseTask(BaseModel):
+    id: UUID
