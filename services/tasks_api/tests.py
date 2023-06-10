@@ -1,18 +1,24 @@
 import uuid
 
 import boto3
+import jwt
 import pytest
 from fastapi import status
+from main import app, get_task_store
+from models import Task, TaskStatus
 from moto import mock_dynamodb
 from starlette.testclient import TestClient
-
-from main import app
-from models import Task, TaskStatus
 from store import TaskStore
 
 
 @pytest.fixture
-def client():
+def task_store(dynamodb_table):
+    return TaskStore(dynamodb_table)
+
+
+@pytest.fixture
+def client(task_store):
+    app.dependency_overrides[get_task_store] = lambda: task_store
     return TestClient(app)
 
 
@@ -73,9 +79,7 @@ def test_added_task_retrieved_by_id(dynamodb_table):
 def test_open_tasks_listed(dynamodb_table):
     repository = TaskStore(table_name=dynamodb_table)
     open_task = Task.create(uuid.uuid4(), "Sharpen your tools", "user@dev.com")
-    closed_task = Task(
-        uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com"
-    )
+    closed_task = Task(uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com")
 
     repository.add(open_task)
     repository.add(closed_task)
@@ -86,11 +90,31 @@ def test_open_tasks_listed(dynamodb_table):
 def test_closed_tasks_listed(dynamodb_table):
     repository = TaskStore(table_name=dynamodb_table)
     open_task = Task.create(uuid.uuid4(), "Sharpen your tools", "user@dev.com")
-    closed_task = Task(
-        uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com"
-    )
+    closed_task = Task(uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com")
 
     repository.add(open_task)
     repository.add(closed_task)
 
     assert repository.list_closed(owner=open_task.owner) == [closed_task]
+
+
+@pytest.fixture
+def user_email():
+    return "bob@builder.com"
+
+
+@pytest.fixture
+def id_token(user_email):
+    return jwt.encode({"cognito:username": user_email}, "secret")
+
+
+def test_create_task(client, user_email, id_token):
+    title = "Sharpen your tools"
+    response = client.post("/api/create-task", json={"title": title}, headers={"Authorization": id_token})
+    body = response.json()
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert body["id"]
+    assert body["title"] == title
+    assert body["status"] == "OPEN"
+    assert body["owner"] == user_email

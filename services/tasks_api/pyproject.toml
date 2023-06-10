@@ -14,6 +14,7 @@ httpx = "^0.24.1"
 pytest-cov = "^4.1.0"
 mangum = "^0.17.0"
 boto3 = "^1.26.150"
+pyjwt = "^2.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"
