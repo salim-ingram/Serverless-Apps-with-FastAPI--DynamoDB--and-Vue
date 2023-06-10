@@ -1,5 +1,0 @@
-{
-    "yaml.schemas": {
-        "aws:/Users/salimingram/Library/Application%20Support/Code/User/globalStorage/amazonwebservices.aws-toolkit-vscode/sam.schema.json": "file:///Users/salimingram/PersonalDev/testdriven.io/Serverless%20Apps%20with%20FastAPI%2C%20DynamoDB%2C%20and%20Vue/services/tasks_api/resources/cognito.yml"
-    }
-}
