@@ -18,8 +18,8 @@ provider:
           Action:
             - dynamodb:DescribeTable
             - dynamodb:Query
-            - dynamodb:Scane
-            - dynamodbGetItem
+            - dynamodb:Scan
+            - dynamodb:GetItem
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
