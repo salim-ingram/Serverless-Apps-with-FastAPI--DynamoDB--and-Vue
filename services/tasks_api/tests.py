@@ -4,10 +4,11 @@ import boto3
 import jwt
 import pytest
 from fastapi import status
-from main import app, get_task_store
-from models import Task, TaskStatus
 from moto import mock_dynamodb
 from starlette.testclient import TestClient
+
+from main import app, get_task_store
+from models import Task, TaskStatus
 from store import TaskStore
 
 
