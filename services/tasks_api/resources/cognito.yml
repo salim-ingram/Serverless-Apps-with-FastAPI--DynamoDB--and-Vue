@@ -2,14 +2,14 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: ${self.provider.stage}-tasks-api-pool
+      UserPoolName: ${self:provider.stage}-tasks-api-pool
       AutoVerifiedAttributes:
         - email
 
   CognitoUserPoolClient:
-    Type: AWS::Cognito::UserPoolCLient
+    Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: ${self.provider.stage}-tasks-api-client
+      ClientName: ${self:provider.stage}-tasks-api-client
       UserPoolId:
         Ref: CognitoUserPool
       ExplicitAuthFlows:
@@ -21,6 +21,6 @@ Outputs:
     Value:
       Ref: CognitoUserPool
 
-  UserPoolCLientId:
+  UserPoolClientId:
     Value:
       Ref: CognitoUserPoolClient
