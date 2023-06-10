@@ -186,3 +186,29 @@ def test_close_task(client, user_email, id_token):
     assert body["title"] == title
     assert body["owner"] == user_email
     assert body["status"] == TaskStatus.CLOSED
+
+
+def test_list_closed_tasks(client, user_email, id_token):
+    title = "Start new project"
+    response = client.post(
+        "/api/create-task",
+        json={"title": title},
+        headers={"Authorization": id_token},
+    )
+    client.post(
+        "/api/close-task",
+        json={"id": response.json()["id"]},
+        headers={"Authorization": id_token},
+    )
+
+    response = client.get(
+        "/api/closed-tasks",
+        headers={"Authorization": id_token},
+    )
+    body = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert body["results"][0]["id"]
+    assert body["results"][0]["title"] == title
+    assert body["results"][0]["owner"] == user_email
+    assert body["results"][0]["status"] == TaskStatus.CLOSED
