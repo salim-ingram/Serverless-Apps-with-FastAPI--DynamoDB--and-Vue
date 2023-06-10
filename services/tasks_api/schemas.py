@@ -17,3 +17,10 @@ class APITask(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class APITasksList(BaseModel):
+    results: list[APITask]
+
+    class Config:
+        orm_mode = True

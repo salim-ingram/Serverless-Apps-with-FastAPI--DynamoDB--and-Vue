@@ -4,10 +4,11 @@ import boto3
 import jwt
 import pytest
 from fastapi import status
-from main import app, get_task_store
-from models import Task, TaskStatus
 from moto import mock_dynamodb
 from starlette.testclient import TestClient
+
+from main import app, get_task_store
+from models import Task, TaskStatus
 from store import TaskStore
 
 
@@ -69,7 +70,11 @@ def dynamodb_table():
 
 def test_added_task_retrieved_by_id(dynamodb_table):
     repository = TaskStore(table_name=dynamodb_table)
-    task = Task.create(uuid.uuid4(), "Sharpen your tools", "user@dev.com")
+    task = Task.create(
+        uuid.uuid4(),
+        "Sharpen your tools",
+        "user@dev.com",
+    )
 
     repository.add(task)
 
@@ -79,7 +84,12 @@ def test_added_task_retrieved_by_id(dynamodb_table):
 def test_open_tasks_listed(dynamodb_table):
     repository = TaskStore(table_name=dynamodb_table)
     open_task = Task.create(uuid.uuid4(), "Sharpen your tools", "user@dev.com")
-    closed_task = Task(uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com")
+    closed_task = Task(
+        uuid.uuid4(),
+        "Sharpen your tools",
+        TaskStatus.CLOSED,
+        "user@dev.com",
+    )
 
     repository.add(open_task)
     repository.add(closed_task)
@@ -89,8 +99,17 @@ def test_open_tasks_listed(dynamodb_table):
 
 def test_closed_tasks_listed(dynamodb_table):
     repository = TaskStore(table_name=dynamodb_table)
-    open_task = Task.create(uuid.uuid4(), "Sharpen your tools", "user@dev.com")
-    closed_task = Task(uuid.uuid4(), "Sharpen your tools", TaskStatus.CLOSED, "user@dev.com")
+    open_task = Task.create(
+        uuid.uuid4(),
+        "Sharpen your tools",
+        "user@dev.com",
+    )
+    closed_task = Task(
+        uuid.uuid4(),
+        "Sharpen your tools",
+        TaskStatus.CLOSED,
+        "user@dev.com",
+    )
 
     repository.add(open_task)
     repository.add(closed_task)
@@ -110,7 +129,11 @@ def id_token(user_email):
 
 def test_create_task(client, user_email, id_token):
     title = "Sharpen your tools"
-    response = client.post("/api/create-task", json={"title": title}, headers={"Authorization": id_token})
+    response = client.post(
+        "/api/create-task",
+        json={"title": title},
+        headers={"Authorization": id_token},
+    )
     body = response.json()
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -118,3 +141,26 @@ def test_create_task(client, user_email, id_token):
     assert body["title"] == title
     assert body["status"] == "OPEN"
     assert body["owner"] == user_email
+
+
+def test_list_open_tasks(client, user_email, id_token):
+    title = "Refactor functions"
+    client.post(
+        "/api/create-task",
+        json={"title": title},
+        headers={
+            "Authorization": id_token,
+        },
+    )
+
+    response = client.get(
+        "/api/open-tasks",
+        headers={"Authorization": id_token},
+    )
+    body = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert body["results"][0]["id"]
+    assert body["results"][0]["title"] == title
+    assert body["results"][0]["owner"] == user_email
+    assert body["results"][0]["status"] == TaskStatus.OPEN
